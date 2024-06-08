@@ -5,7 +5,7 @@
     "main": "server.js",
     "scripts": {
         "dev": "nodemon --legacy-watch src/server.ts",
-        "tsc": "tsc",
+        "build": "tsc",
         "prod": "node build/server.js",
         "db:push": "prisma db push",
         "db": "prisma studio"
