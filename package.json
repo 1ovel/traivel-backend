@@ -2,9 +2,11 @@
     "name": "traivel-backend",
     "version": "1.0.0",
     "description": "",
-    "main": "server.js",
+    "main": "index.js",
     "scripts": {
         "dev": "nodemon --legacy-watch api/index.ts",
+        "build": "tsc",
+        "prod": "node build/index.js",
         "db:push": "prisma db push",
         "db": "prisma studio"
     },
