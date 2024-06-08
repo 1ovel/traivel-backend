@@ -30,11 +30,11 @@ export const EventDTOSchema = z.object({
         .string()
         .min(2, { message: 'City must be at least 2 characters long' }),
     tickets: z.string().min(1, { message: 'Tickets field must not be empty' }),
-    tripDayId: z.string().uuid(),
 });
 
 export const EventSchema = EventDTOSchema.extend({
     id: z.string().uuid(),
+    tripDayId: z.string().uuid()
 });
 
 // Define the TripDay schema

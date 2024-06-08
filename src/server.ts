@@ -1,8 +1,7 @@
+import { PrismaClient } from '@prisma/client';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
-import { CreateTripRequest } from './models/trip';
 import TripService from './services/tripService';
 
 dotenv.config();
@@ -14,7 +13,7 @@ const tripService = new TripService();
 app.use(cors());
 app.use(express.json());
 
-app.get('/generate_trip', async (req, res) => {
+app.post('/generate_trip', async (req, res) => {
     const { numberOfDays, country, city } = req.body;
 
     if (!numberOfDays || !country || !city) {
