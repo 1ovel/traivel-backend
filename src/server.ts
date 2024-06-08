@@ -16,13 +16,20 @@ app.use(express.json());
 
 app.get('/generate_trip', async (req, res) => {
     const { numberOfDays, country, city } = req.body;
+
     if (!numberOfDays || !country || !city) {
         res.status(400).send(
             'Error: Some required values were not provided in the request'
         );
         return;
     }
-    const generatedTripDays = await res.status(200).send('Request received');
+    const generatedTripDays = await tripService.generateTrip(
+        numberOfDays,
+        country,
+        city
+    );
+
+    res.status(200).json(generatedTripDays).send();
 });
 
 app.listen(8080, '0.0.0.0', () => {
