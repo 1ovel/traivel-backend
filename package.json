@@ -4,9 +4,7 @@
     "description": "",
     "main": "server.js",
     "scripts": {
-        "dev": "nodemon --legacy-watch src/server.ts",
-        "build": "tsc",
-        "prod": "node build/server.js",
+        "dev": "nodemon --legacy-watch api/index.ts",
         "db:push": "prisma db push",
         "db": "prisma studio"
     },
