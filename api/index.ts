@@ -16,12 +16,15 @@ app.use(cors());
 app.use(express.json());
 
 app.post('/generate_trip', userService.authenticate, async (req, res) => {
+    console.log('Generate trip request received');
+
     const { numberOfDays, country, city } = req.body;
 
     if (!numberOfDays || !country || !city) {
         res.status(400).send(
             'Error: Some required values were not provided in the request'
         );
+        console.error('Error while creating trip, bad request');
         return;
     }
     const generatedTripDays = await tripService.generateTrip(
@@ -30,6 +33,7 @@ app.post('/generate_trip', userService.authenticate, async (req, res) => {
         city
     );
 
+    console.log('Trip generated successfully');
     res.status(200).json(generatedTripDays).send();
 });
 

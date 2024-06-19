@@ -2,7 +2,7 @@
 CREATE TABLE "Event" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "details" TEXT NOT NULL,
     "address" TEXT NOT NULL,
     "country" TEXT NOT NULL,
     "city" TEXT NOT NULL,

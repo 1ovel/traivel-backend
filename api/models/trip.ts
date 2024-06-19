@@ -17,8 +17,8 @@ export const EventDTOSchema = z.object({
     title: z
         .string()
         .min(3, { message: 'Title must be at least 3 characters long' }),
-    description: z.string().min(5, {
-        message: 'Description must be at least 5 characters long',
+    details: z.string().min(5, {
+        message: 'details must be at least 5 characters long',
     }),
     address: z
         .string()
@@ -34,7 +34,7 @@ export const EventDTOSchema = z.object({
 
 export const EventSchema = EventDTOSchema.extend({
     id: z.string().uuid(),
-    tripDayId: z.string().uuid()
+    tripDayId: z.string().uuid(),
 });
 
 // Define the TripDay schema

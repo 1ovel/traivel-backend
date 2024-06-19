@@ -11,7 +11,7 @@ datasource db {
 model Event {
   id          String  @id @default(uuid())
   title       String
-  description String
+  details String
   address     String
   country     String
   city        String
