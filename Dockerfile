@@ -16,6 +16,8 @@ RUN npm ci
 # Copy the rest of the application code
 COPY . .
 
+RUN npx prisma generate
+
 # Build the application
 RUN npm run build
 
@@ -26,5 +28,4 @@ RUN npm prune --production
 EXPOSE 8080
 
 # Command to run the application
-CMD ["npm", "run", "db:push"]
 CMD ["npm", "run", "prod"]
