@@ -11,6 +11,9 @@ export const UserSchema: z.ZodSchema = z.lazy(() =>
         username: z
             .string()
             .min(3, { message: 'Username must be at least 3 characters long' }),
+        password: z
+            .string()
+            .min(8, { message: 'Password must be at least 8 characters long' }),
         trips: z.array(TripSchema),
     })
 );

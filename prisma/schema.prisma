@@ -11,7 +11,7 @@ datasource db {
 model Event {
   id          String  @id @default(uuid())
   title       String
-  details String
+  details     String
   address     String
   country     String
   city        String
@@ -34,9 +34,23 @@ model Trip {
   participants User[] 
 }
 
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+
 model User {
   id       String  @id @default(uuid())
+  refreshTokens RefreshToken[]
   email    String  @unique
   username String
+  password String
   trips    Trip[]
 }
