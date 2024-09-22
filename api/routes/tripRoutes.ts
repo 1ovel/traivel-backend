@@ -44,7 +44,7 @@ router.post(
     authMiddleware,
     async (
         req: AuthenticatedRequest<GenerateTripRequest>,
-        res: express.Response<GenerateTripResponse>,
+        res: express.Response,
         next: express.NextFunction
     ) => {
         try {
@@ -67,7 +67,11 @@ router.post(
             }
 
             console.log('Trip generated successfully');
-            res.status(200).json({ days: generatedTripDays });
+            res.status(200).json({
+                success: true,
+                data: { days: generatedTripDays },
+                error: '',
+            });
         } catch (error) {
             next(error);
         }
@@ -79,7 +83,7 @@ router.post(
     authMiddleware,
     async (
         req: AuthenticatedRequest<SaveTripRequest>,
-        res: express.Response<SaveTripResponse>,
+        res: express.Response,
         next: express.NextFunction
     ) => {
         try {
@@ -94,7 +98,11 @@ router.post(
             }
 
             const savedTrip = await tripService.saveTrip(userId, trip);
-            res.status(201).json({ savedTrip });
+            res.status(201).json({
+                success: true,
+                data: { savedTrip },
+                error: '',
+            });
         } catch (error) {
             next(error);
         }
@@ -106,7 +114,7 @@ router.put(
     authMiddleware,
     async (
         req: AuthenticatedRequest<UpdateTripRequest>,
-        res: express.Response<UpdateTripResponse>,
+        res: express.Response,
         next: express.NextFunction
     ) => {
         try {
@@ -130,7 +138,11 @@ router.put(
                 tripId,
                 updatedTrip
             );
-            res.status(200).json({ updatedTrip: result });
+            res.status(200).json({
+                success: true,
+                data: { updatedTrip: result },
+                error: '',
+            });
         } catch (error) {
             next(error);
         }
@@ -142,7 +154,7 @@ router.delete(
     authMiddleware,
     async (
         req: AuthenticatedRequest,
-        res: express.Response<DeleteTripResponse>,
+        res: express.Response,
         next: express.NextFunction
     ) => {
         try {
@@ -158,7 +170,11 @@ router.delete(
             }
 
             await tripService.deleteTrip(userId, tripId);
-            res.status(200).json({ message: 'Trip deleted successfully' });
+            res.status(200).json({
+                success: true,
+                data: { message: 'Trip deleted successfully' },
+                error: '',
+            });
         } catch (error) {
             next(error);
         }

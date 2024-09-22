@@ -9,19 +9,17 @@ const errorHandler = (
 ) => {
     if (err instanceof CustomError) {
         return res.status(err.statusCode).json({
-            error: {
-                code: err.statusCode,
-                message: err.message,
-            },
+            success: false,
+            data: null,
+            error: err.message,
         });
     }
 
     console.error(err);
     res.status(500).json({
-        error: {
-            code: 500,
-            message: 'Unexpected internal server error',
-        },
+        success: false,
+        data: null,
+        error: 'Unexpected internal server error',
     });
 };
 
