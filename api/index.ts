@@ -5,6 +5,7 @@ import express from 'express';
 import userRoutes from './routes/userRoutes';
 import tripRoutes from './routes/tripRoutes';
 import errorHandler from './middleware/error';
+import ApiResponse from './utils/apiResponse';
 
 dotenv.config();
 
@@ -19,6 +20,11 @@ app.use('/user', userRoutes);
 
 // Add trip routes
 app.use('/trip', tripRoutes);
+
+// Handle 404 errors
+app.use((req, res, next) => {
+    res.status(404).json(ApiResponse.error('Not Found'));
+});
 
 // Add error handler middleware
 app.use(errorHandler);
