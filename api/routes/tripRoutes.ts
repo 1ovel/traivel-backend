@@ -4,6 +4,7 @@ import authMiddleware from '../middleware/auth';
 import { AuthenticatedRequest } from '../types/AuthentificatedRequest';
 import { TripDayDTO, Trip } from '../models/trip';
 import CustomError from '../utils/customError';
+import ApiResponse from '../utils/apiResponse';
 
 const router = express.Router();
 const tripService = new TripService();
@@ -67,11 +68,9 @@ router.post(
             }
 
             console.log('Trip generated successfully');
-            res.status(200).json({
-                success: true,
-                data: { days: generatedTripDays },
-                error: '',
-            });
+            res.status(200).json(
+                ApiResponse.success({ days: generatedTripDays })
+            );
         } catch (error) {
             next(error);
         }
@@ -98,11 +97,7 @@ router.post(
             }
 
             const savedTrip = await tripService.saveTrip(userId, trip);
-            res.status(201).json({
-                success: true,
-                data: { savedTrip },
-                error: '',
-            });
+            res.status(201).json(ApiResponse.success({ savedTrip }));
         } catch (error) {
             next(error);
         }
@@ -138,11 +133,7 @@ router.put(
                 tripId,
                 updatedTrip
             );
-            res.status(200).json({
-                success: true,
-                data: { updatedTrip: result },
-                error: '',
-            });
+            res.status(200).json(ApiResponse.success({ updatedTrip: result }));
         } catch (error) {
             next(error);
         }
@@ -170,11 +161,9 @@ router.delete(
             }
 
             await tripService.deleteTrip(userId, tripId);
-            res.status(200).json({
-                success: true,
-                data: { message: 'Trip deleted successfully' },
-                error: '',
-            });
+            res.status(200).json(
+                ApiResponse.success({ message: 'Trip deleted successfully' })
+            );
         } catch (error) {
             next(error);
         }

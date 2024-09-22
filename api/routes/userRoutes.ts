@@ -11,6 +11,7 @@ import {
 } from '../types/userTypes';
 import { AuthenticatedRequest } from '../types/AuthentificatedRequest';
 import CustomError from '../utils/customError';
+import ApiResponse from '../utils/apiResponse';
 
 const router = express.Router();
 const userService = new UserService();
@@ -30,11 +31,11 @@ router.post(
                 password
             );
             if (user) {
-                res.status(201).json({
-                    success: true,
-                    data: { message: 'User registered successfully' },
-                    error: '',
-                });
+                res.status(201).json(
+                    ApiResponse.success({
+                        message: 'User registered successfully',
+                    })
+                );
             } else {
                 throw new CustomError(400, 'Failed to register user');
             }
@@ -53,17 +54,9 @@ router.post(
         const { email, password } = req.body;
         const tokens = await userService.loginUser(email, password);
         if (tokens) {
-            res.json({
-                success: true,
-                data: tokens,
-                error: '',
-            });
+            res.json(ApiResponse.success(tokens));
         } else {
-            res.status(401).json({
-                success: false,
-                data: null,
-                error: 'Invalid credentials',
-            });
+            res.status(401).json(ApiResponse.error('Invalid credentials'));
         }
     }
 );
@@ -72,17 +65,9 @@ router.post('/refresh', async (req: express.Request, res: express.Response) => {
     const { refreshToken } = req.body;
     const newAccessToken = await userService.refreshToken(refreshToken);
     if (newAccessToken) {
-        res.json({
-            success: true,
-            data: { accessToken: newAccessToken },
-            error: '',
-        });
+        res.json(ApiResponse.success({ accessToken: newAccessToken }));
     } else {
-        res.status(401).json({
-            success: false,
-            data: null,
-            error: 'Invalid refresh token',
-        });
+        res.status(401).json(ApiResponse.error('Invalid refresh token'));
     }
 });
 
@@ -90,17 +75,9 @@ router.post('/logout', async (req: express.Request, res: express.Response) => {
     const { refreshToken } = req.body;
     const success = await userService.logout(refreshToken);
     if (success) {
-        res.json({
-            success: true,
-            data: { message: 'Logged out successfully' },
-            error: '',
-        });
+        res.json(ApiResponse.success({ message: 'Logged out successfully' }));
     } else {
-        res.status(500).json({
-            success: false,
-            data: null,
-            error: 'Failed to logout',
-        });
+        res.status(500).json(ApiResponse.error('Failed to logout'));
     }
 });
 
@@ -111,17 +88,11 @@ router.delete(
         const { userId } = req.params;
         const success = await userService.deleteUser(userId);
         if (success) {
-            res.json({
-                success: true,
-                data: { message: 'User deleted successfully' },
-                error: '',
-            });
+            res.json(
+                ApiResponse.success({ message: 'User deleted successfully' })
+            );
         } else {
-            res.status(500).json({
-                success: false,
-                data: null,
-                error: 'Failed to delete user',
-            });
+            res.status(500).json(ApiResponse.error('Failed to delete user'));
         }
     }
 );
