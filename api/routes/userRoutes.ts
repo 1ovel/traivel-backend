@@ -10,6 +10,7 @@ import {
     ErrorResponse,
 } from '../types/userTypes';
 import { AuthenticatedRequest } from '../types/AuthentificatedRequest';
+import CustomError from '../utils/customError';
 
 const router = express.Router();
 const userService = new UserService();
@@ -18,14 +19,25 @@ router.post(
     '/register',
     async (
         req: express.Request<{}, {}, RegisterRequest>,
-        res: express.Response<RegisterResponse | ErrorResponse>
+        res: express.Response<RegisterResponse | ErrorResponse>,
+        next: express.NextFunction
     ) => {
-        const { email, username, password } = req.body;
-        const user = await userService.registerUser(email, username, password);
-        if (user) {
-            res.status(201).json({ message: 'User registered successfully' });
-        } else {
-            res.status(400).json({ error: 'Failed to register user' });
+        try {
+            const { email, username, password } = req.body;
+            const user = await userService.registerUser(
+                email,
+                username,
+                password
+            );
+            if (user) {
+                res.status(201).json({
+                    message: 'User registered successfully',
+                });
+            } else {
+                throw new CustomError(400, 'Failed to register user');
+            }
+        } catch (error) {
+            next(error);
         }
     }
 );

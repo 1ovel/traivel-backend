@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user';
+import CustomError from '../utils/customError';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ export default class UserService {
         email: string,
         username: string,
         password: string
-    ): Promise<User | null> {
+    ): Promise<User> {
         const hashedPassword = await bcrypt.hash(password, 10);
         try {
             const user = await prisma.user.create({
@@ -19,7 +20,7 @@ export default class UserService {
             return user;
         } catch (error) {
             console.error('Error registering user:', error);
-            return null;
+            throw new CustomError(400, 'Failed to register user');
         }
     }
 
@@ -42,19 +43,43 @@ export default class UserService {
             return null;
         }
 
-        const accessToken = jwt.sign({ userId: user.id }, jwtSecret, {
-            expiresIn: '15m',
-        });
-        const refreshToken = jwt.sign({ userId: user.id }, refreshSecret, {
-            expiresIn: '7d',
+        // Check if a refresh token already exists for the user
+        const existingToken = await prisma.refreshToken.findFirst({
+            where: { userId: user.id },
         });
 
-        // Store refresh token in the database
+        if (existingToken) {
+            // Return existing tokens if they are still valid
+            const isTokenValid = existingToken.expiresAt > new Date();
+            if (isTokenValid) {
+                return {
+                    accessToken: jwt.sign({ userId: user.id }, jwtSecret, {
+                        expiresIn: '15m',
+                    }),
+                    refreshToken: existingToken.token,
+                };
+            } else {
+                // Delete the expired token
+                await prisma.refreshToken.delete({
+                    where: { id: existingToken.id },
+                });
+            }
+        }
+
+        // Create new tokens if no valid existing token is found
+        const accessToken = jwt.sign({ userId: user.id }, jwtSecret, {
+            expiresIn: '2d',
+        });
+        const refreshToken = jwt.sign({ userId: user.id }, refreshSecret, {
+            expiresIn: '10d',
+        });
+
+        // Store the new refresh token in the database
         await prisma.refreshToken.create({
             data: {
                 token: refreshToken,
                 userId: user.id,
-                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+                expiresAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 7 days
             },
         });
 

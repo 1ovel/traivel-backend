@@ -3,6 +3,7 @@ import TripService from '../services/tripService';
 import authMiddleware from '../middleware/auth';
 import { AuthenticatedRequest } from '../types/AuthentificatedRequest';
 import { TripDayDTO, Trip } from '../models/trip';
+import CustomError from '../utils/customError';
 
 const router = express.Router();
 const tripService = new TripService();
@@ -43,26 +44,33 @@ router.post(
     authMiddleware,
     async (
         req: AuthenticatedRequest<GenerateTripRequest>,
-        res: express.Response<GenerateTripResponse>
+        res: express.Response<GenerateTripResponse>,
+        next: express.NextFunction
     ) => {
-        console.log('Generate trip request received');
+        try {
+            console.log('Generate trip request received');
 
-        const { numberOfDays, country, city } = req.body;
+            const { numberOfDays, country, city } = req.body;
 
-        if (!numberOfDays || !country || !city) {
-            res.status(400).json({ days: null });
-            console.error('Error while creating trip, bad request');
-            return;
+            if (!numberOfDays || !country || !city) {
+                throw new CustomError(400, 'Missing required parameters');
+            }
+
+            const generatedTripDays = await tripService.generateTrip(
+                numberOfDays,
+                country,
+                city
+            );
+
+            if (!generatedTripDays) {
+                throw new CustomError(500, 'Failed to generate trip');
+            }
+
+            console.log('Trip generated successfully');
+            res.status(200).json({ days: generatedTripDays });
+        } catch (error) {
+            next(error);
         }
-
-        const generatedTripDays = await tripService.generateTrip(
-            numberOfDays,
-            country,
-            city
-        );
-
-        console.log('Trip generated successfully');
-        res.status(200).json({ days: generatedTripDays });
     }
 );
 
@@ -71,28 +79,24 @@ router.post(
     authMiddleware,
     async (
         req: AuthenticatedRequest<SaveTripRequest>,
-        res: express.Response<SaveTripResponse | { error: string }>
+        res: express.Response<SaveTripResponse>,
+        next: express.NextFunction
     ) => {
-        const userId = req.userId;
-        if (!userId) {
-            return res.status(401).json({ error: 'User not authenticated' });
-        }
-
-        const { trip } = req.body;
-        if (!trip) {
-            return res.status(400).json({ error: 'Trip data is required' });
-        }
-
         try {
+            const userId = req.userId;
+            if (!userId) {
+                throw new CustomError(401, 'User not authenticated');
+            }
+
+            const { trip } = req.body;
+            if (!trip) {
+                throw new CustomError(400, 'Trip data is required');
+            }
+
             const savedTrip = await tripService.saveTrip(userId, trip);
             res.status(201).json({ savedTrip });
         } catch (error) {
-            console.error('Error saving trip:', error);
-            if (error instanceof Error && error.message === 'User not found') {
-                res.status(404).json({ error: 'User not found' });
-            } else {
-                res.status(500).json({ error: 'Failed to save trip' });
-            }
+            next(error);
         }
     }
 );
@@ -102,23 +106,25 @@ router.put(
     authMiddleware,
     async (
         req: AuthenticatedRequest<UpdateTripRequest>,
-        res: express.Response<UpdateTripResponse | { error: string }>
+        res: express.Response<UpdateTripResponse>,
+        next: express.NextFunction
     ) => {
-        const userId = req.userId;
-        if (!userId) {
-            return res.status(401).json({ error: 'User not authenticated' });
-        }
-
-        const { tripId } = req.params;
-        const { updatedTrip } = req.body;
-
-        if (!tripId || !updatedTrip) {
-            return res
-                .status(400)
-                .json({ error: 'Trip ID and updated trip data are required' });
-        }
-
         try {
+            const userId = req.userId;
+            if (!userId) {
+                throw new CustomError(401, 'User not authenticated');
+            }
+
+            const { tripId } = req.params;
+            const { updatedTrip } = req.body;
+
+            if (!tripId || !updatedTrip) {
+                throw new CustomError(
+                    400,
+                    'Trip ID and updated trip data are required'
+                );
+            }
+
             const result = await tripService.updateTrip(
                 userId,
                 tripId,
@@ -126,8 +132,7 @@ router.put(
             );
             res.status(200).json({ updatedTrip: result });
         } catch (error) {
-            console.error('Error updating trip:', error);
-            res.status(500).json({ error: 'Failed to update trip' });
+            next(error);
         }
     }
 );
@@ -137,25 +142,25 @@ router.delete(
     authMiddleware,
     async (
         req: AuthenticatedRequest,
-        res: express.Response<DeleteTripResponse | { error: string }>
+        res: express.Response<DeleteTripResponse>,
+        next: express.NextFunction
     ) => {
-        const userId = req.userId;
-        if (!userId) {
-            return res.status(401).json({ error: 'User not authenticated' });
-        }
-
-        const { tripId } = req.params;
-
-        if (!tripId) {
-            return res.status(400).json({ error: 'Trip ID is required' });
-        }
-
         try {
+            const userId = req.userId;
+            if (!userId) {
+                throw new CustomError(401, 'User not authenticated');
+            }
+
+            const { tripId } = req.params;
+
+            if (!tripId) {
+                throw new CustomError(400, 'Trip ID is required');
+            }
+
             await tripService.deleteTrip(userId, tripId);
             res.status(200).json({ message: 'Trip deleted successfully' });
         } catch (error) {
-            console.error('Error deleting trip:', error);
-            res.status(500).json({ error: 'Failed to delete trip' });
+            next(error);
         }
     }
 );
